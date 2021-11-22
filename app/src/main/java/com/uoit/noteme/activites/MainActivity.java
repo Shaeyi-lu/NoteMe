@@ -14,6 +14,7 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
+import com.google.gson.Gson;
 import com.uoit.noteme.R;
 import com.uoit.noteme.adapters.NotesAdapter;
 import com.uoit.noteme.database.NotesDatabase;
@@ -38,6 +39,8 @@ public class MainActivity extends AppCompatActivity implements  NotesListener{
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+
 
         ImageView imageAddNoteMain = findViewById(R.id.imageAddNoteMain);
         imageAddNoteMain.setOnClickListener(v -> startActivityForResult(new Intent(

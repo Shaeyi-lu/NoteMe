@@ -37,6 +37,7 @@ dependencies {
     androidTestImplementation 'androidx.test.ext:junit:1.1.2'
     androidTestImplementation 'androidx.test.espresso:espresso-core:3.3.0'
 
+
     // https://developer.android.com/topic/libraries/architecture/room
     def room_version = "2.2.5"
 
@@ -57,4 +58,6 @@ dependencies {
 
     // https://github.com/vinc3m1/RoundedImageView
     implementation 'com.makeramen:roundedimageview:2.3.0'
+
+    implementation 'com.google.code.gson:gson:2.8.9'
 }

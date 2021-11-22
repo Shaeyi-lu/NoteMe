@@ -14,6 +14,7 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -31,6 +32,7 @@ import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 
 import com.google.android.material.bottomsheet.BottomSheetBehavior;
+import com.google.gson.Gson;
 import com.uoit.noteme.R;
 import com.uoit.noteme.adapters.NotesAdapter;
 import com.uoit.noteme.database.NotesDatabase;
@@ -42,6 +44,7 @@ import java.util.Date;
 import java.util.Locale;
 
 public class CreateNoteActivity extends AppCompatActivity {
+    private static final String TAG = "CreateNoteActivity";
     private EditText inputNoteTitle, inputNoteSubtitle, inputNoteText;
     private TextView textDateTime;
     private View viewSubtitleIndicator;
@@ -61,6 +64,7 @@ public class CreateNoteActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_create_note);
 
+
         ImageView imageBack = findViewById(R.id.imageBack);
         imageBack.setOnClickListener(v -> onBackPressed());
 
@@ -77,6 +81,7 @@ public class CreateNoteActivity extends AppCompatActivity {
         ImageView imageSave = findViewById(R.id.imageSave);
         imageSave.setOnClickListener(v -> saveNote());
 
+
         selectedNoteColor = "#333333";
         selectedImagePath = "";
 
@@ -84,6 +89,7 @@ public class CreateNoteActivity extends AppCompatActivity {
             alreadyAvailableNote = (Note) getIntent().getSerializableExtra("note");
             setViewOrUpdateNote();
         }
+
 
         initMiscellaneous();
         setSubtitleIndicatorColor();
@@ -108,10 +114,21 @@ public class CreateNoteActivity extends AppCompatActivity {
         final String noteText = inputNoteText.getText().toString().trim();
         final String dateTimeStr = textDateTime.getText().toString().trim();
 
+
         if (noteTitle.isEmpty()) {
             Toast.makeText(this, "Note title can't be empty!", Toast.LENGTH_SHORT).show();
             return;
         }
+        Gson gson = new Gson();
+
+        Notes noteObj = new Notes(noteTitle, noteSubtitle, noteText, selectedImagePath);
+
+        //serialization
+        String json = gson.toJson(noteObj);
+
+        Log.d(TAG, json);
+
+
 
         final Note note = new Note();
         note.setTitle(noteTitle);
