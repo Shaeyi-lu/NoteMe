@@ -108,6 +108,7 @@ public class CreateNoteActivity extends AppCompatActivity {
                 String json = gson.toJson(noteObj); //converts gson object to json string
 
                 Log.d(TAG, json);
+
         /*
         json.put("title", noteTitle);
         json.put("subtitle", noteSubtitle);
@@ -119,9 +120,10 @@ public class CreateNoteActivity extends AppCompatActivity {
 
 
                     if(isExternalStorageWriteable()){
+                        Toast.makeText(CreateNoteActivity.this, json, Toast.LENGTH_LONG).show();
                         //gets path of file
                         File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-                        File myFile  = new File(root, "file.json"); //creates file
+                        File myFile  = new File(root, "file"); //creates file
 
                         if(myFile.exists()){//checks if file exists to append string
                             Toast.makeText(CreateNoteActivity.this, json, Toast.LENGTH_LONG).show();
