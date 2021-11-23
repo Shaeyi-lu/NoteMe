@@ -13,11 +13,13 @@ import android.graphics.drawable.GradientDrawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Bundle;
+import android.os.Environment;
 import android.provider.MediaStore;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
+import android.widget.Button;
 import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
@@ -38,7 +40,12 @@ import com.uoit.noteme.adapters.NotesAdapter;
 import com.uoit.noteme.database.NotesDatabase;
 import com.uoit.noteme.entities.Note;
 
+import java.io.File;
+import java.io.FileOutputStream;
 import java.io.InputStream;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.OutputStreamWriter;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.Locale;
@@ -47,11 +54,15 @@ public class CreateNoteActivity extends AppCompatActivity {
     private static final String TAG = "CreateNoteActivity";
     private EditText inputNoteTitle, inputNoteSubtitle, inputNoteText;
     private TextView textDateTime;
+    private Button jsonExp;
     private View viewSubtitleIndicator;
     private ImageView imageNote;
     private String selectedNoteColor;
     private String selectedImagePath;
     private NotesAdapter notesAdapter;
+    boolean mExternalStorageAvailable = false;
+    boolean mExternalStorageWriteable = false;
+    String state = Environment.getExternalStorageState();
 
     private static final int REQUEST_CODE_STORAGE_PERMISSION = 1;
     private static final int REQUEST_CODE_SELECT_IMAGE = 2;
@@ -65,9 +76,11 @@ public class CreateNoteActivity extends AppCompatActivity {
         setContentView(R.layout.activity_create_note);
 
 
+
         ImageView imageBack = findViewById(R.id.imageBack);
         imageBack.setOnClickListener(v -> onBackPressed());
 
+        jsonExp = findViewById(R.id.jsonExport);
         inputNoteTitle = findViewById(R.id.inputNoteTitle);
         inputNoteSubtitle = findViewById(R.id.inputNoteSubtitle);
         inputNoteText = findViewById(R.id.inputNoteText);
@@ -76,7 +89,78 @@ public class CreateNoteActivity extends AppCompatActivity {
         textDateTime = findViewById(R.id.textDateTime);
         textDateTime.setText(new SimpleDateFormat(
                 "EEEE, dd MMMM yyyy HH:mm a", Locale.getDefault()).format(new Date().getTime())
+
         );
+
+
+
+        jsonExp.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View view) {
+
+                final String noteTitle = inputNoteTitle.getText().toString().trim();
+                final String noteSubtitle = inputNoteSubtitle.getText().toString().trim();
+                final String noteText = inputNoteText.getText().toString().trim();
+                Gson gson = new Gson();//makes object of Gson
+
+                Notes noteObj = new Notes(noteTitle, noteSubtitle, noteText, selectedImagePath);
+
+                String json = gson.toJson(noteObj); //converts gson object to json string
+
+                Log.d(TAG, json);
+        /*
+        json.put("title", noteTitle);
+        json.put("subtitle", noteSubtitle);
+        json.put("text", noteText);
+        json.put("image path", selectedImagePath);
+        String s = json.toJSONString();
+
+        Log.d(TAG, s);*/
+
+
+                    if(isExternalStorageWriteable()){
+                        //gets path of file
+                        File root = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+                        File myFile  = new File(root, "file.json"); //creates file
+
+                        if(myFile.exists()){//checks if file exists to append string
+                            Toast.makeText(CreateNoteActivity.this, json, Toast.LENGTH_LONG).show();
+                            try{
+                                FileOutputStream fstream = new FileOutputStream(myFile);
+                                OutputStreamWriter myOutWriter = new OutputStreamWriter(fstream);
+
+                                myOutWriter.append(json);
+                                myOutWriter.close();
+
+                                fstream.close();
+                            }catch (Exception e){
+                                e.printStackTrace();
+                            }
+                        }
+                        else{
+                            try {
+                                myFile.createNewFile();
+                                FileOutputStream fstream = new FileOutputStream(myFile);
+                                fstream.write(json.getBytes());
+                                fstream.close();
+                                Toast.makeText(CreateNoteActivity.this, "json file created", Toast.LENGTH_LONG).show();
+
+                            } catch (IOException e) {
+                                e.printStackTrace();
+                            }
+
+                        }
+
+
+
+
+
+
+
+                    }
+
+            }
+        });
 
         ImageView imageSave = findViewById(R.id.imageSave);
         imageSave.setOnClickListener(v -> saveNote());
@@ -119,17 +203,11 @@ public class CreateNoteActivity extends AppCompatActivity {
             Toast.makeText(this, "Note title can't be empty!", Toast.LENGTH_SHORT).show();
             return;
         }
-        Gson gson = new Gson();
-
-        Notes noteObj = new Notes(noteTitle, noteSubtitle, noteText, selectedImagePath);
-
-        //serialization
-        String json = gson.toJson(noteObj);
-
-        Log.d(TAG, json);
 
 
 
+
+        //System.out.println("JSON file created: "+json);
         final Note note = new Note();
         note.setTitle(noteTitle);
         note.setSubtitle(noteSubtitle);
@@ -141,6 +219,7 @@ public class CreateNoteActivity extends AppCompatActivity {
         if (alreadyAvailableNote != null){
             note.setId(alreadyAvailableNote.getId());
         }
+
 
         @SuppressLint("StaticFieldLeak")
         class SaveNoteTask extends AsyncTask<Void, Void, Void> {
@@ -386,5 +465,14 @@ public class CreateNoteActivity extends AppCompatActivity {
 
         }
         return filePath;
+    }
+    public boolean isExternalStorageWriteable() {
+        if (Environment.MEDIA_MOUNTED.equals(state)) {
+            // We can read and write the media
+            mExternalStorageAvailable = mExternalStorageWriteable = true;
+        } else {
+            mExternalStorageWriteable = false;
+        }
+        return mExternalStorageWriteable;
     }
 }

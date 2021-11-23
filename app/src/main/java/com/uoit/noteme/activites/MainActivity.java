@@ -14,7 +14,6 @@ import androidx.appcompat.app.AppCompatActivity;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.recyclerview.widget.StaggeredGridLayoutManager;
 
-import com.google.gson.Gson;
 import com.uoit.noteme.R;
 import com.uoit.noteme.adapters.NotesAdapter;
 import com.uoit.noteme.database.NotesDatabase;
